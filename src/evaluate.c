@@ -19,14 +19,46 @@ OperatorTable Operator[] = {
 			{.operator = "|",.callback = or},
             };	
 
-int evaluate(char *expression){
-	return 1;
+int evaluate(char *expression, Stack *operatorStack, Stack *dataStack){
+	Tokenizer *tokenizer;
+	Token *token;
+	NumberToken *number;
+	OperatorToken *operator;
+	NumberToken num;
+	
+	tokenizer = tokenizerNew(expression);
+	
+	if(tokenizer == NULL){Throw(ERR_INVALID_TOKEN);}
+	if(expression == NULL){Throw(ERR_NO_EXPRESSION);}
+	else Throw(ERR_INVALID_TOKEN);
+	
+	token = nextToken(tokenizer);
+	
+	while(nextToken(tokenizer) !=NULL){
+		if(token->type == NUMBER_TOKEN){push(dataStack,(NumberToken *)token);}
+		else if (token->type != NUMBER_TOKEN){Throw(ERR_NOT_DATA);}
+		
+		if(token->type == OPERATOR_TOKEN){push(operatorStack,(NumberToken *)token);}
+		else if (token->type != OPERATOR_TOKEN){Throw(ERR_NOT_OPERATOR);}
+	}
+	//token = tokenizerNew(tokenizer);
+	//tryEvaluateOperatorOnStackThenPush(Stack *dataStack,Stack *operatorStack, OperatorToken *operator);
 }
 
-void tryEvaluateOperatorOnStackThenPush(Stack *operatorStack, Stack *dataStack, OperatorToken *operator){
-	
+void tryEvaluateOperatorOnStackThenPush(Stack *dataStack,Stack *operatorStack, OperatorToken *operator){
+	OperatorToken *OperatorTOS;
+	do{
+	OperatorTOS = pop(operatorStack);
+	if((operator->precedence) > OperatorTOS->precedence){
+	push(operatorStack,OperatorTOS);
+	push(operatorStack,operator);
+	break;}
+	else{evaluateOperator(dataStack, OperatorTOS);}
+	}
+	while((OperatorTOS = pop(operatorStack)) !=NULL);
+	//push(operatorStack,operator);
 }
-void evaluateAllOperatorsOnStack(Stack *operatorStack, Stack *dataStack){
+void evaluateAllOperatorsOnStack(Stack *dataStack,Stack *operatorStack){
 	OperatorToken *operator;
 	while((operator = pop(operatorStack)) != NULL){
 		evaluateOperator(dataStack, operator);
