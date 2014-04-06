@@ -19,30 +19,40 @@ OperatorTable Operator[] = {
 			{.operator = "|",.callback = or},
             };	
 
-int evaluate(char *expression, Stack *operatorStack, Stack *dataStack){
+int evaluate(Stack *dataStack, Stack *operatorStack,  char *expression){
+	int i =0;
 	Tokenizer *tokenizer;
 	Token *token;
 	NumberToken *number;
 	OperatorToken *operator;
-	NumberToken num;
-	
 	tokenizer = tokenizerNew(expression);
 	
-	if(tokenizer == NULL){Throw(ERR_INVALID_TOKEN);}
-	if(expression == NULL){Throw(ERR_NO_EXPRESSION);}
-	else Throw(ERR_INVALID_TOKEN);
-	
+	for(i = 0; i < 3; i++){
 	token = nextToken(tokenizer);
-	
-	while(nextToken(tokenizer) !=NULL){
-		if(token->type == NUMBER_TOKEN){push(dataStack,(NumberToken *)token);}
-		else if (token->type != NUMBER_TOKEN){Throw(ERR_NOT_DATA);}
-		
-		if(token->type == OPERATOR_TOKEN){push(operatorStack,(NumberToken *)token);}
-		else if (token->type != OPERATOR_TOKEN){Throw(ERR_NOT_OPERATOR);}
+		if(i%2==0){
+			if(token->type == NUMBER_TOKEN)push(dataStack, (NumberToken *)token);
+			else Throw(ERR_NOT_DATA);
+		}
+		else{
+			if(token->type == OPERATOR_TOKEN)push(operatorStack, (OperatorToken *)token);
+			else Throw(ERR_NOT_OPERATOR);
+		}
 	}
-	//token = tokenizerNew(tokenizer);
-	//tryEvaluateOperatorOnStackThenPush(Stack *dataStack,Stack *operatorStack, OperatorToken *operator);
+	token = nextToken(tokenizer);
+	while(token !=NULL){
+		if(token->type != OPERATOR_TOKEN)Throw(ERR_NOT_OPERATOR);
+		tryEvaluateOperatorOnStackThenPush(dataStack, operatorStack,(OperatorToken *)token);
+	token = nextToken(tokenizer);
+	if(token != NULL) {
+		if(token->type == NUMBER_TOKEN) {push(dataStack, (NumberToken *)token);}
+		else {Throw(ERR_NOT_DATA);}
+	}
+	else{Throw(ERR_INVALID_EXPRESSION);}
+	token = nextToken(tokenizer);
+	}
+	evaluateAllOperatorsOnStack(dataStack,operatorStack);
+	number =pop(dataStack);
+	return number->value;
 }
 
 void tryEvaluateOperatorOnStackThenPush(Stack *dataStack,Stack *operatorStack, OperatorToken *operator){

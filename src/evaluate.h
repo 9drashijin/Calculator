@@ -9,7 +9,7 @@ typedef struct{
 	int (*callback)(int , int);
 }OperatorTable;
 
-int evaluate(char *expression, Stack *operatorStack, Stack *dataStack);
+int evaluate(Stack *dataStack, Stack *operatorStack,  char *expression);
 void tryEvaluateOperatorOnStackThenPush(Stack *dataStack,Stack *operatorStack, OperatorToken *operator);
 void evaluateAllOperatorsOnStack(Stack *operatorStack, Stack *dataStack);
 void evaluateOperator(Stack *dataStack, OperatorToken *operator);
